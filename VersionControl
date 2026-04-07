@@ -1,0 +1,42 @@
+GIT PRACTICAL NOTES
+
+COMMITTING CHANGES
+- git commit -m "message" is used to save changes to the local repository.
+- Example: git commit -m "Add hello and test files"
+- Output shows which files were added or changed.
+
+VIEWING COMMIT HISTORY
+- git log shows the commit history in the current branch.
+- Example output shows commit hash, author, date, and message.
+- HEAD -> main indicates the current branch and latest commit.
+
+CHECKING OUT COMMITS
+- git checkout <commit-hash> lets you view a previous commit.
+- This puts you in a detached HEAD state:
+  - You can explore, make experimental changes, or commit.
+  - Changes made here do not affect main unless you create a new branch.
+
+RETURNING TO A BRANCH
+- git checkout main returns you to the main branch.
+- git checkout -f main forces a switch to main (useful if conflicts exist).
+
+PULLING CHANGES
+- git pull fetches and merges changes from the remote repository.
+- If the branch has no tracking information, Git will ask you to specify the remote and branch.
+- Example: git branch --set-upstream-to=<remote>/<branch> main
+
+COMMON ERRORS
+- Typing 'branch' alone will not work in PowerShell; use git branch to list branches.
+- Detached HEAD state is normal when checking out a specific commit; create a branch to save work if needed.
+
+ADVANCED CONCEPTS TO LEARN
+- Merge Conflicts: When Git cannot automatically merge changes from different branches.
+- Reset: Undo commits locally.
+- Revert: Undo a commit safely by creating a new commit.
+- Stash: Temporarily save changes without committing.
+- Cherry-pick: Apply a specific commit from one branch to another.
+
+FINAL NOTES
+- Always commit your changes before switching branches.
+- Use git log to track history and understand what has been committed.
+- Learn to handle conflicts, reset, revert, stash, and cherry-pick to manage changes effectively.
