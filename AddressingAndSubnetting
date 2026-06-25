@@ -1,0 +1,335 @@
+# Subnetting Master Notes
+
+## 1. IP Addresses
+
+An IP address is a logical address used to identify a device on a network.
+
+```
+192.168.1.10
+```
+
+IPv4 consists of **4 octets**, each octet = **8 bits**.
+
+```
+192 . 168 . 1 . 10
+
+11000000.10101000.00000001.00001010
+```
+
+Total: **32 bits**
+
+Purpose:
+- Identifies devices
+- Allows communication between devices
+- Helps routers forward traffic
+
+---
+
+## 2. Network vs Host Portions
+
+Every IP address has two parts:
+
+```
+[ Network ][ Host ]
+```
+
+Example: `192.168.1.70/24` → Subnet Mask: `255.255.255.0`
+
+```
+Network = 192.168.1
+Host    = 70
+```
+
+- **Network** identifies the subnet
+- **Host** identifies the device
+
+---
+
+## 3. CIDR Notation
+
+CIDR tells us how many bits belong to the network.
+
+`/24` means 24 network bits, 8 host bits.
+
+```
+Host Bits = 32 - CIDR
+```
+
+Example: `/27` → `32 - 27 = 5 host bits`
+
+| CIDR | Host Bits |
+|------|-----------|
+| /24  | 8         |
+| /25  | 7         |
+| /26  | 6         |
+| /27  | 5         |
+| /28  | 4         |
+| /29  | 3         |
+| /30  | 2         |
+
+---
+
+## 4. Subnet Masks
+
+| CIDR | Subnet Mask       |
+|------|-------------------|
+| /24  | 255.255.255.0     |
+| /25  | 255.255.255.128   |
+| /26  | 255.255.255.192   |
+| /27  | 255.255.255.224   |
+| /28  | 255.255.255.240   |
+| /29  | 255.255.255.248   |
+| /30  | 255.255.255.252   |
+
+Memorize the octet values:
+
+```
+128  192  224  240  248  252  254  255
+```
+
+---
+
+## 5. Magic Number Method
+
+```
+Magic Number = 256 - Interesting Octet
+```
+
+Example: `192.168.1.70/26`
+
+- Subnet Mask: `255.255.255.192`
+- Interesting Octet: `192`
+- Magic Number: `256 - 192 = 64`
+
+Subnet blocks:
+
+```
+0    64    128    192    256
+```
+
+Ranges:
+
+```
+0 - 63
+64 - 127
+128 - 191
+192 - 255
+```
+
+Since 70 falls in `64 - 127`:
+- **Network Address:** `192.168.1.64`
+
+---
+
+## 6. Finding Network, Broadcast, and Usable Range
+
+Example: `192.168.1.70/26`
+
+1. Find the block: `64 - 127`
+2. **Network Address:** `192.168.1.64`
+3. **Broadcast Address:** `192.168.1.127`
+4. **Usable Range:** `192.168.1.65` to `192.168.1.126`
+
+```
+Network Address   = First address in block
+Broadcast Address = Last address in block
+First Usable Host = Network + 1
+Last Usable Host  = Broadcast - 1
+```
+
+---
+
+## 7. Determining Subnet Sizes from Host Requirements
+
+```
+2^h - 2
+```
+
+Where `h` = host bits.
+
+Example: Need **50 hosts**.
+
+- `2^5 - 2 = 30` — too small
+- `2^6 - 2 = 62` — works
+
+Host bits = 6 → CIDR = `32 - 6 = /26`
+
+| Hosts Needed | CIDR |
+|--------------|------|
+| 2            | /30  |
+| 6            | /29  |
+| 14           | /28  |
+| 30           | /27  |
+| 62           | /26  |
+| 126          | /25  |
+| 254          | /24  |
+
+---
+
+## 8. VLSM Fundamentals
+
+**VLSM** = Variable Length Subnet Mask
+
+Purpose: Reduce wasted IP addresses.
+
+Example requirements:
+- LAN A = 100 hosts → `/25` (126 usable)
+- LAN B = 50 hosts  → `/26` (62 usable)
+- LAN C = 20 hosts  → `/27` (30 usable)
+
+**Always allocate the largest subnet first.**
+
+---
+
+## 9. Finishing VLSM Design
+
+1. Sort requirements largest to smallest
+2. Determine subnet size for each
+3. Assign addresses sequentially
+
+Example with `192.168.1.0/24`:
+
+```
+192.168.1.0/25
+192.168.1.128/26
+192.168.1.192/27
+192.168.1.224/28
+```
+
+Result: No overlap, minimal waste.
+
+---
+
+## 10. Spotting Subnetting Mistakes
+
+### Overlapping Networks
+
+**Wrong:**
+```
+192.168.1.0/25
+192.168.1.64/26   ← Overlaps with the /25
+```
+
+### Wrong Broadcast Address
+
+`192.168.1.64/26`
+- Wrong: Broadcast = `126`
+- Correct: Broadcast = `127`
+
+### Wasting Addresses
+
+Need 20 hosts but using `/24` → huge waste. Use `/27` instead.
+
+---
+
+## 11. Supernetting / Route Summarization
+
+Combining multiple networks into one summary route.
+
+Example:
+
+```
+192.168.0.0/24
+192.168.1.0/24
+```
+
+Summary route: `192.168.0.0/23`
+
+Benefits:
+- Smaller routing tables
+- Faster routing decisions
+- Easier management
+
+**Networks must be contiguous.**
+
+---
+
+## 12. Real-World Design Challenges
+
+| Department   | Hosts |
+|--------------|-------|
+| Head Office  | 100   |
+| Finance      | 40    |
+| HR           | 20    |
+| IT           | 10    |
+
+Tasks: Choose subnet sizes, avoid overlap, leave room for growth, reduce waste.
+
+Real-world subnetting is mostly VLSM.
+
+---
+
+## 13. Exam-Speed Subnetting Techniques
+
+Memorize mask values:
+
+```
+128  192  224  240  248  252  254  255
+```
+
+Memorize block sizes:
+
+```
+128  64  32  16  8  4  2  1
+```
+
+Instant recognition:
+
+```
+/25 = 128
+/26 = 64
+/27 = 32
+/28 = 16
+/29 = 8
+/30 = 4
+```
+
+Example: `192.168.1.140/26`
+
+- Block size = 64
+- Blocks: `0`, `64`, `128`, `192`
+- 140 falls in `128 - 191`
+- Network: `192.168.1.128`
+- Broadcast: `192.168.1.191`
+- Usable: `192.168.1.129 - 192.168.1.190`
+
+---
+
+## 14. Practice Scenarios
+
+**Scenario 1:** `10.0.0.140/27`
+- Find Network, Broadcast, and Usable Range
+
+**Scenario 2:** `172.16.5.200/28`
+- Find Network, Broadcast, and Usable Range
+
+**Scenario 3:** Design a VLSM plan for:
+- 100 hosts, 50 hosts, 25 hosts, 10 hosts
+- Using `192.168.10.0/24`
+
+**Scenario 4:** Summarize:
+- `192.168.4.0/24`
+- `192.168.5.0/24`
+
+**Scenario 5:** Spot the mistake:
+```
+192.168.1.0/25
+192.168.1.100/26
+```
+
+---
+
+## Final Summary
+
+```
+IP Address     = Device Identifier
+Subnet Mask    = Separates Network and Host Portions
+CIDR           = Number of Network Bits
+Magic Number   = Finds Subnet Blocks
+Network Addr   = First Address in Block
+Broadcast Addr = Last Address in Block
+Usable Range   = Everything Between Network and Broadcast
+VLSM           = Different Subnet Sizes to Reduce Waste
+Supernetting   = Combining Networks
+Good Design    = No Overlap + Minimal Waste
+```
